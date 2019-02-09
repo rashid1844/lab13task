@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Button button1;
-    private TextView view1, view2;
+    private TextView view1, view2, view3;
     private RequestQueue mQueue;
 
     @Override
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         button1=(Button)findViewById(R.id.button1);
         view1=(TextView) findViewById(R.id.textView);
         view2=(TextView) findViewById(R.id.textView2);
+view3=(TextView) findViewById(R.id.textView3);
         mQueue = Volley.newRequestQueue(this);
 
 
@@ -97,11 +98,13 @@ public class MainActivity extends AppCompatActivity {
             outputStream.write(data.getBytes());
             outputStream.close();
             Log.v("storage app", "data saved..");
-            view2.setText("Data stored");
+            view3.setText("Previous " + view2.getText().toString());
+            view2.setText("State: Data stored");
         } catch (Exception e) {
             e.printStackTrace();
             Log.v("storage app", "Error: data is not saved");
-            view2.setText("Data not stored seccfully");
+            view3.setText("Previous " + view2.getText().toString());
+            view2.setText("State: Data not stored seccfully");
         }
     }
 
@@ -122,11 +125,13 @@ public class MainActivity extends AppCompatActivity {
             inputStream.close();
             view1.setText(sb);
             Log.v("storage app", "data loaded..");
-            view2.setText("Data loaded");
+            view3.setText("Previous " + view2.getText().toString());
+            view2.setText("State: Data loaded");
         } catch (Exception e) {
             e.printStackTrace();
             Log.v("storage app", "Error: data is not loaded.." + e.getMessage());
-            view2.setText("unable to load data");
+            view3.setText("Previous " + view2.getText().toString());
+            view2.setText("State: unable to load data");
             jsonParse();
 
         //    fetch_web();//if file didn't exist fetch from web
@@ -172,7 +177,8 @@ public class MainActivity extends AppCompatActivity {
             // fetch data
             DownloadWebpageText task = new DownloadWebpageText();
             task.execute("https://meta.stackoverflow.com/feeds");
-            view2.setText("Web Fetch");
+            view3.setText("Previous " + view2.getText().toString());
+            view2.setText("State: Web Fetch");
             Log.v("WEB", "web fetch");
         } else {
             // display error
@@ -237,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void jsonParse() {
         Log.v("JSON","start");
-        String url = "https://api.myjson.com/bins/kp9wz";
+        String url = "https://api.myjson.com/bins/12o1e0";
 view1.setText("");
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -245,17 +251,18 @@ view1.setText("");
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            JSONArray jsonArray = response.getJSONArray("employees");
+                            JSONArray jsonArray = response.getJSONArray("students");
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject employee = jsonArray.getJSONObject(i);
 
-                                String firstName = employee.getString("firstname");
-                                int age = employee.getInt("age");
+                                String firstName = employee.getString("name");
+                                int age = employee.getInt("id");
                                 String mail = employee.getString("mail");
 
                                 view1.append(firstName + ", " + String.valueOf(age) + ", " + mail + "\n\n");
-                                view2.setText("JSON parse");
+                                view3.setText("Previous " + view2.getText().toString());
+                                view2.setText("State: JSON parse");
                                 Log.v("JSON","Secces");
                                 store_file();
                             }
