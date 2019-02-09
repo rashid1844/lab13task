@@ -4,13 +4,24 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -23,11 +34,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+
 public class MainActivity extends AppCompatActivity {
 
 
     private Button button1;
     private TextView view1, view2;
+    private RequestQueue mQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         button1=(Button)findViewById(R.id.button1);
         view1=(TextView) findViewById(R.id.textView);
         view2=(TextView) findViewById(R.id.textView2);
-
+        mQueue = Volley.newRequestQueue(this);
 
 
 
@@ -50,7 +63,9 @@ public class MainActivity extends AppCompatActivity {
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-fetch_web();//ignore what's loaded and go fetch from web
+//fetch_web();//ignore what's loaded and go fetch from web
+                jsonParse();
+
             }
         });
 
@@ -112,8 +127,10 @@ fetch_web();//ignore what's loaded and go fetch from web
             e.printStackTrace();
             Log.v("storage app", "Error: data is not loaded.." + e.getMessage());
             view2.setText("unable to load data");
+            jsonParse();
 
-            fetch_web();//if file didn\t exist fetch from web
+        //    fetch_web();//if file didn't exist fetch from web
+
         }
     }
 
@@ -209,6 +226,61 @@ fetch_web();//ignore what's loaded and go fetch from web
         reader.read(buffer);
         return new String(buffer);
     }
+
+
+
+
+
+
+
+
+
+    public void jsonParse() {
+        Log.v("JSON","start");
+        String url = "https://api.myjson.com/bins/kp9wz";
+view1.setText("");
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray jsonArray = response.getJSONArray("employees");
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject employee = jsonArray.getJSONObject(i);
+
+                                String firstName = employee.getString("firstname");
+                                int age = employee.getInt("age");
+                                String mail = employee.getString("mail");
+
+                                view1.append(firstName + ", " + String.valueOf(age) + ", " + mail + "\n\n");
+                                view2.setText("JSON parse");
+                                Log.v("JSON","Secces");
+                                store_file();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.v("JSON","FAILED");
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+
+        mQueue.add(request);
+    }
+
+
+
+
+
+
+
 
 
 
